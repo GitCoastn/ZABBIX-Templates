@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.2</version>
+    <date>2022-10-25T08:21:07Z</date>
+    <template_groups>
+        <template_group>
+            <uuid>a571c0d144b14fd4a87a9d9b2aa9fcd6</uuid>
+            <name>Templates/Applications</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>111bdc8c050a46d5b27cc87d0e9829b9</uuid>
+            <template>Template App MailStore by HTTP</template>
+            <name>Template App MailStore by HTTP</name>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>cf047c973971497e9b7e87287b7f59d9</uuid>
+                    <name>MailStore: GetInstances</name>
+                    <type>HTTP_AGENT</type>
+                    <key>mailstore.getinstances</key>
+                    <delay>5m</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <authtype>BASIC</authtype>
+                    <username>{$MAILSTORE.USER}</username>
+                    <password>{$MAILSTORE.PASSWORD}</password>
+                    <preprocessing>
+                        <step>
+                            <type>TRIM</type>
+                            <parameters>
+                                <parameter>﻿</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <url>https://{HOST.DNS}:8474/api/invoke/GetInstances</url>
+                    <posts>instanceFilter=*</posts>
+                    <request_method>POST</request_method>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Zabbix raw items</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>400368586fad468fa18bb0788f22411d</uuid>
+                    <name>MailStore: GetServiceStatus</name>
+                    <type>HTTP_AGENT</type>
+                    <key>mailstore.getservicestatus</key>
+                    <delay>5m</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <authtype>BASIC</authtype>
+                    <username>{$MAILSTORE.USER}</username>
+                    <password>{$MAILSTORE.PASSWORD}</password>
+                    <preprocessing>
+                        <step>
+                            <type>TRIM</type>
+                            <parameters>
+                                <parameter>﻿</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <url>https://{HOST.DNS}:8474/api/invoke/GetServiceStatus</url>
+                    <request_method>POST</request_method>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Zabbix raw items</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>f109d02280be46418c972e47e5f90043</uuid>
+                    <name>Mailstore: Amount of Informations</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.information.counter</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>Infos</units>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.messages[?(@.type == &quot;information&quot;)].length()</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>d93b1184024c43c98177ba3d5d2707e0</uuid>
+                    <name>Mailstore: First information</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.information.firsttext</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.messages[?(@.type == &quot;information&quot;)].text.first()</parameter>
+                            </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>null</error_handler_params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>c2f0e24e9a73473da9c37684e232b454</uuid>
+                    <name>MailStore: Get version</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.version</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.environmentInfo.version</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>880821de503643c3871dd383eeae9c30</uuid>
+                            <expression>countunique(/Template App MailStore by HTTP/mailstore.version,10m)&gt;1</expression>
+                            <name>Mailstore: Installed version changed</name>
+                            <opdata>Current version: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>0ec83d50b7aa49f082ca79df40350acc</uuid>
+                    <name>Mailstore: Amount of Warnings</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.warning.counter</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>Warnings</units>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.messages[?(@.type == &quot;warning&quot; &amp;&amp; !(@.text =~ &quot;Ignore SSL Warnings&quot;))].length()</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>bb4944ebb71e4e1da14814bf163b24cf</uuid>
+                    <name>Mailstore: First warning</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.warning.firsttext</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.messages[?(@.type == &quot;warning&quot; &amp;&amp; !(@.text =~ &quot;Ignore SSL Warnings&quot;))].text.first()</parameter>
+                            </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>null</error_handler_params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>9007577e439644aa9bc71fb174a230e8</uuid>
+                    <name>MailStore: Get webclient version</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.webclientversion</key>
+                    <delay>0</delay>
+                    <history>30d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.environmentInfo.webClientVersion</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>08fb451aabf2475cb04eb74d317d5934</uuid>
+                            <expression>countunique(/Template App MailStore by HTTP/mailstore.webclientversion,10m)&gt;1</expression>
+                            <name>Mailstore: Installed webclient version changed</name>
+                            <opdata>Current version: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>afaec2b82fc14d75ac5e4dbeb3d9f8ef</uuid>
+                    <name>Discover: Instances</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.discover.instances</key>
+                    <delay>0</delay>
+                    <lifetime>14d</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>d3d7143bb4734a5f8d0e94bd45f47023</uuid>
+                            <name>Instance {#ID} archive size</name>
+                            <type>DEPENDENT</type>
+                            <key>mailstore.instance.archivesize[{#ID}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <units>B</units>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$.result[*].statisticsSize.sum()</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <parameters>
+                                        <parameter>[]&quot;</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>mailstore.instance.stores[{#ID}]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>MailStore: Instance {#ID}</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>c3f145bd3355463b9de58329c785fdd1</uuid>
+                            <name>Instance {#ID} Mail Counter</name>
+                            <type>DEPENDENT</type>
+                            <key>mailstore.instance.mailcounter[{#ID}]</key>
+                            <delay>0</delay>
+                            <history>{$MAILSTORE.DIFFTIMESPAN:&quot;{#ID}&quot;}</history>
+                            <units>!Mails</units>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$.result[*].statisticsCount.sum()</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <parameters>
+                                        <parameter>[]&quot;</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>mailstore.instance.stores[{#ID}]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>MailStore: Instance {#ID}</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>491fb1721c0a48d0860105583772cbea</uuid>
+                                    <expression>countunique(/Template App MailStore by HTTP/mailstore.instance.mailcounter[{#ID}],{$MAILSTORE.DIFFTIMESPAN:&quot;{#ID}&quot;})&lt;2</expression>
+                                    <name>Mailstore: Instance &quot;{#ID}&quot; did not archive mails in the last {$MAILSTORE.DIFFTIMESPAN:&quot;{#ID}&quot;} - May check?</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>e98854a0cf07448594828827500b7ef9</uuid>
+                            <name>Instance {#ID} problem indicator</name>
+                            <type>DEPENDENT</type>
+                            <key>mailstore.instance.problemindicator[{#ID}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$.result</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <parameters>
+                                        <parameter>[]&quot;</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>JAVASCRIPT</type>
+                                    <parameters>
+                                        <parameter>if (value == &quot;&quot; || value == null){
+return 1;
+}
+else {
+return 0;
+}
+</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>mailstore.instance.stores[{#ID}]</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>MailStore: Instance {#ID}</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>0a21a72e1ca84794a2f933e868e2d885</uuid>
+                            <name>Instance {#ID} StartStop Error</name>
+                            <type>DEPENDENT</type>
+                            <key>mailstore.instance.startstoperror[{#ID}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$.result[?(@.instanceID==&quot;{#ID}&quot;)].startStopError</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <parameters>
+                                        <parameter>[]&quot;</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>mailstore.getinstances</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>MailStore: Instance {#ID}</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>9f03f5f1dc754aadbb1828835e627955</uuid>
+                                    <expression>last(/Template App MailStore by HTTP/mailstore.instance.startstoperror[{#ID}])&lt;&gt;&quot;null&quot;</expression>
+                                    <name>Mailstore: Instance &quot;{#ID}&quot; has a Start/Stop-Error</name>
+                                    <opdata>{ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>ec4ad4e3f1f34f98bd0b130a37ffbd81</uuid>
+                            <name>Instance {#ID} Status</name>
+                            <type>DEPENDENT</type>
+                            <key>mailstore.instance.status[{#ID}]</key>
+                            <delay>0</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <preprocessing>
+                                <step>
+                                    <type>JSONPATH</type>
+                                    <parameters>
+                                        <parameter>$.result[?(@.instanceID==&quot;{#ID}&quot;)].status</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>TRIM</type>
+                                    <parameters>
+                                        <parameter>[]&quot;</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <master_item>
+                                <key>mailstore.getinstances</key>
+                            </master_item>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>MailStore: Instance {#ID}</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>3c7294d208a842fabe8097d0e3908e2e</uuid>
+                                    <expression>change(/Template App MailStore by HTTP/mailstore.instance.status[{#ID}])&lt;&gt;0 and last(/Template App MailStore by HTTP/mailstore.instance.status[{#ID}])&lt;&gt;&quot;running&quot;</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>last(/Template App MailStore by HTTP/mailstore.instance.status[{#ID}])=&quot;running&quot;</recovery_expression>
+                                    <name>Mailstore: Instance &quot;{#ID}&quot; is not running</name>
+                                    <opdata>Status: {ITEM.LASTVALUE1}</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>ffefa69e5ed344a2b7369c0f48a2d72a</uuid>
+                            <name>Mailstore: Instance {#ID}: Get Stores</name>
+                            <type>HTTP_AGENT</type>
+                            <key>mailstore.instance.stores[{#ID}]</key>
+                            <delay>5m</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <authtype>BASIC</authtype>
+                            <username>{$MAILSTORE.USER}</username>
+                            <password>{$MAILSTORE.PASSWORD}</password>
+                            <preprocessing>
+                                <step>
+                                    <type>TRIM</type>
+                                    <parameters>
+                                        <parameter>﻿</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <url>https://{HOST.DNS}:8474/api/invoke/GetStores</url>
+                            <posts>instanceID={#ID}</posts>
+                            <request_method>POST</request_method>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Zabbix raw items</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <uuid>57f0635fe5ed42008f1508eb9a2765d7</uuid>
+                            <expression>nodata(/Template App MailStore by HTTP/mailstore.instance.stores[{#ID}],15m)=1 or last(/Template App MailStore by HTTP/mailstore.instance.problemindicator[{#ID}])=1</expression>
+                            <name>Mailstore: No store data gatherable from instance &quot;{#ID}&quot; - probably frozen</name>
+                            <priority>AVERAGE</priority>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <uuid>c9274be56ab545df8370ac893135a0ee</uuid>
+                            <name>Mailstore: Instance {#ID} development</name>
+                            <show_work_period>NO</show_work_period>
+                            <show_triggers>NO</show_triggers>
+                            <graph_items>
+                                <graph_item>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>26C6DA</color>
+                                    <calc_fnc>ALL</calc_fnc>
+                                    <item>
+                                        <host>Template App MailStore by HTTP</host>
+                                        <key>mailstore.instance.archivesize[{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>274482</color>
+                                    <yaxisside>RIGHT</yaxisside>
+                                    <calc_fnc>ALL</calc_fnc>
+                                    <item>
+                                        <host>Template App MailStore by HTTP</host>
+                                        <key>mailstore.instance.mailcounter[{#ID}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <master_item>
+                        <key>mailstore.getinstances</key>
+                    </master_item>
+                    <lld_macro_paths>
+                        <lld_macro_path>
+                            <lld_macro>{#ALIAS}</lld_macro>
+                            <path>$.alias</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#ID}</lld_macro>
+                            <path>$.instanceID</path>
+                        </lld_macro_path>
+                        <lld_macro_path>
+                            <lld_macro>{#NAME}</lld_macro>
+                            <path>$.displayName</path>
+                        </lld_macro_path>
+                    </lld_macro_paths>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$MAILSTORE.DIFFTIMESPAN}</macro>
+                    <value>24h</value>
+                    <description>The timespan in which a change of the amount of archived mails is expected.</description>
+                </macro>
+                <macro>
+                    <macro>{$MAILSTORE.PASSWORD}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Password of Adminuser for Mailstore</description>
+                </macro>
+                <macro>
+                    <macro>{$MAILSTORE.USER}</macro>
+                    <value>Username</value>
+                    <description>Adminuser for Mailstore</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+    <triggers>
+        <trigger>
+            <uuid>dd4f6c0e556445f3b6f849d9084d8add</uuid>
+            <expression>last(/Template App MailStore by HTTP/mailstore.information.counter)&gt;0 and length(last(/Template App MailStore by HTTP/mailstore.information.firsttext))&gt;0</expression>
+            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+            <recovery_expression>last(/Template App MailStore by HTTP/mailstore.information.counter)=0</recovery_expression>
+            <name>Mailstore: There are active informations!</name>
+            <opdata>Amount: {ITEM.LASTVALUE1} - First message: {ITEM.LASTVALUE2}</opdata>
+            <priority>INFO</priority>
+        </trigger>
+        <trigger>
+            <uuid>282c4ecf708e466683e105336a0d7218</uuid>
+            <expression>last(/Template App MailStore by HTTP/mailstore.warning.counter)&gt;0 and length(last(/Template App MailStore by HTTP/mailstore.warning.firsttext))&gt;0</expression>
+            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+            <recovery_expression>last(/Template App MailStore by HTTP/mailstore.warning.counter)=0</recovery_expression>
+            <name>Mailstore: There are active warnings!</name>
+            <opdata>Amount: {ITEM.LASTVALUE1} - First message: {ITEM.LASTVALUE2}</opdata>
+            <priority>WARNING</priority>
+        </trigger>
+    </triggers>
+</zabbix_export>
