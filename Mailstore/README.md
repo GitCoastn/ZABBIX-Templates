@@ -25,7 +25,9 @@
   * *MailStore: GetInstances*/**Discover: Instances** - (Calculated) Discovery based on GetInstances-Json
     * *MailStore: GetInstances/Discover: Instances*/**Instance {#ID} StartStop Error** - (Calculated) When there is one, StartStop-Error will be saved here
     * *MailStore: GetInstances/Discover: Instances*/**Instance {#ID} Status** - (Calculated) Receives the running status of the instance
-    * *MailStore: GetInstances/Discover: Instances*/**Instance {#ID}: Get Stores** - Instance based discovery of stores with GetStores-Json
+    * *MailStore: GetInstances/Discover: Instances*/**Instance {#ID}: Get Stores** :microscope: - Instance based discovery of stores with GetStores-Json
       * *MailStore: GetInstances/Discover: Instances/Instance {#ID}: Get Stores*/**Instance {#ID} archive size** - (Calculated) Size of the mailarchive
-      * *MailStore: GetInstances/Discover: Instances/Instance {#ID}: Get Stores*/**Instance {#ID} Mail Counter** - (Calculated) Amount of mails the mailarchive
-      * *MailStore: GetInstances/Discover: Instances/Instance {#ID}: Get Stores*/**Instance {#ID} problem indicator** - (Calculated) When you get no stores, the archive has a problem.
+      * *MailStore: GetInstances/Discover: Instances/Instance {#ID}: Get Stores*/**Instance {#ID} Mail Counter** - (Calculated) Amount of mails in the mailarchive
+      * *MailStore: GetInstances/Discover: Instances/Instance {#ID}: Get Stores*/**Instance {#ID} problem indicator** - (Calculated) When you get no stores, the instance has an issue (process frozen etc).
+### Triggers
+asd
