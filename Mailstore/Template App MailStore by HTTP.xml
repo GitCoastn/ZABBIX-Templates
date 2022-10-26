@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>6.2</version>
-    <date>2022-10-25T08:21:07Z</date>
+    <date>2022-10-26T14:17:55Z</date>
     <template_groups>
         <template_group>
             <uuid>a571c0d144b14fd4a87a9d9b2aa9fcd6</uuid>
@@ -20,11 +20,119 @@
             </groups>
             <items>
                 <item>
+                    <uuid>235bb2d7e72c44729aeabfed3292def6</uuid>
+                    <name>Mailstore: Amount of Errors</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.error.counter</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>Errors</units>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.messages[?(@.type == &quot;error&quot;)].length()</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>c59677ef59134d43a865eeac9c464a63</uuid>
+                    <name>Mailstore: First error</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.error.firsttext</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result.messages[?(@.type == &quot;error&quot;)].text.first()</parameter>
+                            </parameters>
+                            <error_handler>CUSTOM_VALUE</error_handler>
+                            <error_handler_params>null</error_handler_params>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>64780590638c4fae82f3aaa0424940b0</uuid>
+                    <name>Mailstore: General problem indicator</name>
+                    <type>DEPENDENT</type>
+                    <key>mailstore.generalproblem</key>
+                    <delay>0</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <parameters>
+                                <parameter>$.result</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>TRIM</type>
+                            <parameters>
+                                <parameter>[]&quot;</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>if (value == &quot;&quot; || value == null){
+return 1;
+}
+else {
+return 0;
+}</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <master_item>
+                        <key>mailstore.getservicestatus</key>
+                    </master_item>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>MailStore</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>588f616f5ac8483bb18d45791df825e7</uuid>
+                            <expression>last(/Template App MailStore by HTTP/mailstore.generalproblem)=1</expression>
+                            <name>Mailstore: Received empty service status, there's maybe a problem</name>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
                     <uuid>cf047c973971497e9b7e87287b7f59d9</uuid>
                     <name>MailStore: GetInstances</name>
                     <type>HTTP_AGENT</type>
                     <key>mailstore.getinstances</key>
-                    <delay>5m</delay>
+                    <delay>{$MAILSTORE.FREQUENCY}</delay>
                     <history>7d</history>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -54,7 +162,7 @@
                     <name>MailStore: GetServiceStatus</name>
                     <type>HTTP_AGENT</type>
                     <key>mailstore.getservicestatus</key>
-                    <delay>5m</delay>
+                    <delay>{$MAILSTORE.FREQUENCY}</delay>
                     <history>7d</history>
                     <trends>0</trends>
                     <value_type>TEXT</value_type>
@@ -482,7 +590,7 @@ return 0;
                             <name>Mailstore: Instance {#ID}: Get Stores</name>
                             <type>HTTP_AGENT</type>
                             <key>mailstore.instance.stores[{#ID}]</key>
-                            <delay>5m</delay>
+                            <delay>{$MAILSTORE.FREQUENCY}</delay>
                             <history>7d</history>
                             <trends>0</trends>
                             <value_type>TEXT</value_type>
@@ -580,6 +688,11 @@ return 0;
                     <description>The timespan in which a change of the amount of archived mails is expected.</description>
                 </macro>
                 <macro>
+                    <macro>{$MAILSTORE.FREQUENCY}</macro>
+                    <value>5m</value>
+                    <description>Frequenzy of checks</description>
+                </macro>
+                <macro>
                     <macro>{$MAILSTORE.PASSWORD}</macro>
                     <type>SECRET_TEXT</type>
                     <description>Password of Adminuser for Mailstore</description>
@@ -593,6 +706,15 @@ return 0;
         </template>
     </templates>
     <triggers>
+        <trigger>
+            <uuid>2a87c9d02d1b4eebb0404105d8736624</uuid>
+            <expression>last(/Template App MailStore by HTTP/mailstore.error.counter)&gt;0 and length(last(/Template App MailStore by HTTP/mailstore.error.firsttext))&gt;0</expression>
+            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+            <recovery_expression>last(/Template App MailStore by HTTP/mailstore.error.counter)=0</recovery_expression>
+            <name>Mailstore: There are active errors!</name>
+            <opdata>Amount: {ITEM.LASTVALUE1} - First message: {ITEM.LASTVALUE2}</opdata>
+            <priority>AVERAGE</priority>
+        </trigger>
         <trigger>
             <uuid>dd4f6c0e556445f3b6f849d9084d8add</uuid>
             <expression>last(/Template App MailStore by HTTP/mailstore.information.counter)&gt;0 and length(last(/Template App MailStore by HTTP/mailstore.information.firsttext))&gt;0</expression>
