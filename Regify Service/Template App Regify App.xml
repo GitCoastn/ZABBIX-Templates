@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.2</version>
+    <date>2023-01-03T09:05:47Z</date>
+    <template_groups>
+        <template_group>
+            <uuid>a571c0d144b14fd4a87a9d9b2aa9fcd6</uuid>
+            <name>Templates/Applications</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>01134c90bf4040eeaa75d7b522667ffe</uuid>
+            <template>Template App Regify Service</template>
+            <name>Template App Regify Service</name>
+            <description>Monitors your regify service by using web scenarios and ssh</description>
+            <groups>
+                <group>
+                    <name>Templates/Applications</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>d9b11a1a4d584995a3574ba26ff6b159</uuid>
+                    <name>Current Monitoring Message</name>
+                    <type>HTTP_AGENT</type>
+                    <key>regify.monitoringmessage</key>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <description>The message you get when querying https://{$REGIFY.URL}/monitoring.php</description>
+                    <url>https://{$REGIFY.URL}/monitoring.php</url>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Regify</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>4cbc69e1bdeb4577838769f9db3801a6</uuid>
+                            <expression>find(/Template App Regify Service/regify.monitoringmessage,,&quot;like&quot;,&quot;OK&quot;)&lt;&gt;1 and find(/Template App Regify Service/regify.monitoringmessage,,&quot;like&quot;,&quot;WARNING&quot;)=1</expression>
+                            <name>Status not &quot;OK&quot;, but Service is running</name>
+                            <opdata>Message: {ITEM.LASTVALUE1}</opdata>
+                            <url>https://{$REGIFY.URL}/monitoring.php</url>
+                            <priority>WARNING</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>60922144c99a4560b5e4b08078b82341</uuid>
+                            <expression>find(/Template App Regify Service/regify.monitoringmessage,,&quot;like&quot;,&quot;OK&quot;)&lt;&gt;1 and find(/Template App Regify Service/regify.monitoringmessage,,&quot;like&quot;,&quot;ERROR&quot;)=1</expression>
+                            <name>Status not &quot;OK&quot;, Service not running</name>
+                            <opdata>Message: {ITEM.LASTVALUE1}</opdata>
+                            <url>https://{$REGIFY.URL}/monitoring.php</url>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>71a8e218ac874919b51374b856cfc295</uuid>
+                    <name>CPU load average of the last 5 minutes</name>
+                    <type>SSH</type>
+                    <key>ssh.run[&quot;cpu avgld&quot;,{$REGIFY.URL},22,utf-8]</key>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>cat /proc/loadavg|cut -d &quot; &quot; -f2</params>
+                    <username>{$REGIFY.SSHUSER}</username>
+                    <password>{$REGIFY.SSHPASSWORD}</password>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Regify</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>170960998d83424cb81a26a119fe0049</uuid>
+                    <name>Free appliance memory in percent</name>
+                    <type>SSH</type>
+                    <key>ssh.run[&quot;free mem&quot;,{$REGIFY.URL},22,utf-8]</key>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>free|grep &quot;Mem:&quot;|awk '{print ($4+$6)/($2/100)}'</params>
+                    <username>{$REGIFY.SSHUSER}</username>
+                    <password>{$REGIFY.SSHPASSWORD}</password>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Regify</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>bb6c389e9c5e4dc4b1fe718d7f74f633</uuid>
+                            <expression>min(/Template App Regify Service/ssh.run[&quot;free mem&quot;,{$REGIFY.URL},22,utf-8],5m)&gt;{$MEMORY.UTIL.MAX}</expression>
+                            <name>High memory utilization for over 5min</name>
+                            <opdata>Current: {ITEM.LASTVALUE1}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>39ce291e88564134bd1559fa6bad4b1c</uuid>
+                    <name>Current MariaDB status</name>
+                    <type>SSH</type>
+                    <key>ssh.run[&quot;mdb stat&quot;,{$REGIFY.URL},22,utf-8]</key>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                    <params>systemctl status mariadb|grep active</params>
+                    <username>{$REGIFY.SSHUSER}</username>
+                    <password>{$REGIFY.SSHPASSWORD}</password>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Regify</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>df7e513daa804d07b90010852e0d245f</uuid>
+                            <expression>find(/Template App Regify Service/ssh.run[&quot;mdb stat&quot;,{$REGIFY.URL},22,utf-8],,&quot;like&quot;,&quot;active (running)&quot;)=0</expression>
+                            <name>MariaDB status abnormal</name>
+                            <opdata>Current Status: {ITEM.LASTVALUE1}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>b4821ac386ed4d9abaab4ac533d30513</uuid>
+                    <name>Used disk space on / in percent</name>
+                    <type>SSH</type>
+                    <key>ssh.run[&quot;usd spc&quot;,{$REGIFY.URL},22,utf-8]</key>
+                    <history>14d</history>
+                    <value_type>FLOAT</value_type>
+                    <units>%</units>
+                    <params>df|grep &quot;/$&quot;|awk '{print $5}'|tr -d &quot;%&quot;</params>
+                    <username>{$REGIFY.SSHUSER}</username>
+                    <password>{$REGIFY.SSHPASSWORD}</password>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Regify</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>4fb1a125045a4c7f9671986af03ce5c9</uuid>
+                            <expression>last(/Template App Regify Service/ssh.run[&quot;usd spc&quot;,{$REGIFY.URL},22,utf-8])&gt;{$VFS.FS.PUSED.MAX.CRIT}</expression>
+                            <name>Disk space is critically low</name>
+                            <opdata>Used: {ITEM.LASTVALUE1}</opdata>
+                            <priority>AVERAGE</priority>
+                        </trigger>
+                        <trigger>
+                            <uuid>43cf951d9e424b24894005d1c7c7b780</uuid>
+                            <expression>last(/Template App Regify Service/ssh.run[&quot;usd spc&quot;,{$REGIFY.URL},22,utf-8])&gt;{$VFS.FS.PUSED.MAX.WARN}</expression>
+                            <name>Disk space is low</name>
+                            <opdata>Used: {ITEM.LASTVALUE1}</opdata>
+                            <priority>WARNING</priority>
+                            <dependencies>
+                                <dependency>
+                                    <name>Disk space is critically low</name>
+                                    <expression>last(/Template App Regify Service/ssh.run[&quot;usd spc&quot;,{$REGIFY.URL},22,utf-8])&gt;{$VFS.FS.PUSED.MAX.CRIT}</expression>
+                                </dependency>
+                            </dependencies>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>db77d8141f894388974444c9a11f36ce</uuid>
+                    <name>SSH Users active</name>
+                    <type>SSH</type>
+                    <key>ssh.run[&quot;usr act&quot;,{$REGIFY.URL},22,utf-8]</key>
+                    <history>14d</history>
+                    <trends>0</trends>
+                    <units>User(s)</units>
+                    <params>who|wc -l</params>
+                    <username>{$REGIFY.SSHUSER}</username>
+                    <password>{$REGIFY.SSHPASSWORD}</password>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Regify</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>2a16c1475f8f46e6bd15bbd84750b99f</uuid>
+                            <expression>last(/Template App Regify Service/ssh.run[&quot;usr act&quot;,{$REGIFY.URL},22,utf-8])&gt;0</expression>
+                            <name>Users connected via SSH</name>
+                            <opdata>Active: {ITEM.LASTVALUE1}</opdata>
+                            <priority>INFO</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <macros>
+                <macro>
+                    <macro>{$MEMORY.UTIL.MAX}</macro>
+                    <value>90</value>
+                    <description>This macro is used as a threshold in memory utilization trigger.</description>
+                </macro>
+                <macro>
+                    <macro>{$REGIFY.SSHPASSWORD}</macro>
+                    <type>SECRET_TEXT</type>
+                    <description>Password of the SSH user you created</description>
+                </macro>
+                <macro>
+                    <macro>{$REGIFY.SSHUSER}</macro>
+                    <value>username</value>
+                    <description>SSH user you created</description>
+                </macro>
+                <macro>
+                    <macro>{$REGIFY.URL}</macro>
+                    <value>regify.example.com</value>
+                    <description>Base URL (e.g. regify.cloud4you.biz) without protocol and leading/trailing slashes - also known as FQDN</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.PUSED.MAX.CRIT}</macro>
+                    <value>90</value>
+                    <description>Disk usage in percent for critical trigger</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.PUSED.MAX.WARN}</macro>
+                    <value>80</value>
+                    <description>Disk usage in percent for warning trigger</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
